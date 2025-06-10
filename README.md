@@ -27,3 +27,9 @@ side state management and [TanStack DB](https://tanstack.com/db) for local
 storage. An initial schema defines a `users` table to keep track of patients and
 healthcare providers and their roles. Utility helpers in `src/store` provide a
 simple API to update and read the current user.
+
+## Email configuration
+
+Password reset emails are sent via a POST request to the URL provided in the
+`EMAIL_API_URL` environment variable. Configure this variable to point to your
+email service endpoint.
