@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ interface Chat {
   messages: Message[];
 }
 
-export default function Chat() {
+export default function Chat({ expanded }: { expanded: boolean }) {
   const initialId = Date.now();
   const [chats, setChats] = useState<Chat[]>([
     { id: initialId, title: "New Chat", messages: [] },
@@ -114,7 +115,12 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div
+      className={cn(
+        "flex h-screen md:h-full",
+        expanded ? "w-full" : "md:max-w-4xl md:mx-auto"
+      )}
+    >
       <div className="w-48 border-r p-2 flex flex-col">
         <Button size="sm" className="mb-2" onClick={startNewChat}>
           + New Chat
