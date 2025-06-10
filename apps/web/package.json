@@ -16,6 +16,7 @@
     "clsx": "^2.0.0",
     "lucide-react": "^0.292.0",
     "tailwind-merge": "^1.14.0",
+    "@radix-ui/react-slot": "^1.0.0",
     "@tanstack/store": "latest",
     "@tanstack/react-store": "latest",
     "@tanstack/db": "latest",
