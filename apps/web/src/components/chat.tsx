@@ -118,9 +118,8 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-screen md:h-full",
-        sidebarRight ? "flex-row-reverse" : "flex-row",
-        expanded ? "w-full" : "md:max-w-4xl md:mx-auto"
+        "flex h-screen md:h-full w-full",
+        sidebarRight ? "flex-row-reverse" : "flex-row"
       )}
     >
       <div
@@ -156,7 +155,12 @@ export default function Chat({ expanded }: { expanded: boolean }) {
           ))}
         </div>
       </div>
-      <div className="flex-1 flex flex-col">
+      <div
+        className={cn(
+          "flex-1 flex flex-col",
+          expanded ? "" : "md:max-w-4xl md:mx-auto w-full"
+        )}
+      >
         <div className="flex-1 overflow-auto p-4 space-y-2">
           {currentChat.messages.map((msg) => (
             <div
