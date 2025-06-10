@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { useCurrentUser, setCurrentUser } from './store/userStore'
 
