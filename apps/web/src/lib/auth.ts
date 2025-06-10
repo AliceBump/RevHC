@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth'
-import { passkey } from 'better-auth/plugins'
+import { passkey } from 'better-auth/plugins/passkey'
 
 export const auth = betterAuth({
   emailAndPassword: {

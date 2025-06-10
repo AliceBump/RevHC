@@ -118,13 +118,15 @@ export default function SignUp() {
             className="w-full"
             disabled={loading}
             onClick={async () => {
-              await signUp.email({
-                email,
-                password,
-                name: `${firstName} ${lastName}`,
-                image: image ? await convertImageToBase64(image) : '',
-                callbackURL: '/dashboard',
-                fetchOptions: {
+              await signUp.email(
+                {
+                  email,
+                  password,
+                  name: `${firstName} ${lastName}`,
+                  image: image ? await convertImageToBase64(image) : '',
+                  callbackURL: '/dashboard',
+                },
+                {
                   onResponse: () => {
                     setLoading(false)
                   },
@@ -134,8 +136,8 @@ export default function SignUp() {
                   onSuccess: async () => {
                     // handle success
                   },
-                },
-              })
+                }
+              )
             }}
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : 'Create an account'}
