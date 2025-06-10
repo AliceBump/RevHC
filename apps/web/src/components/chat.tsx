@@ -21,9 +21,21 @@ interface Chat {
   messages: Message[];
 }
 
+interface ChatFolder {
+  id: number;
+  title: string;
+  chats: Chat[];
+  expanded?: boolean;
+}
+
+type ChatItem = Chat | ChatFolder;
+
+const isFolder = (item: ChatItem): item is ChatFolder =>
+  (item as ChatFolder).chats !== undefined;
+
 export default function Chat({ expanded }: { expanded: boolean }) {
   const initialId = Date.now();
-  const [chats, setChats] = useState<Chat[]>([
+  const [chats, setChats] = useState<ChatItem[]>([
     { id: initialId, title: "New Chat", messages: [] },
   ]);
   const [currentChatId, setCurrentChatId] = useState<number>(initialId);
@@ -35,12 +47,45 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   const [contextChatId, setContextChatId] = useState<number | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  const currentChat = chats.find((c) => c.id === currentChatId)!;
+  const findChatById = (items: ChatItem[], id: number): Chat | undefined => {
+    for (const item of items) {
+      if (isFolder(item)) {
+        const found = item.chats.find((c) => c.id === id);
+        if (found) return found;
+      } else if (item.id === id) {
+        return item;
+      }
+    }
+  };
+
+  const currentChat = findChatById(chats, currentChatId)!;
 
   const startNewChat = () => {
     const id = Date.now();
     setChats((chs) => [...chs, { id, title: "New Chat", messages: [] }]);
     setCurrentChatId(id);
+  };
+
+  const updateChat = (
+    items: ChatItem[],
+    id: number,
+    updater: (c: Chat) => Chat
+  ): ChatItem[] => {
+    return items.map((item) => {
+      if (isFolder(item)) {
+        const idx = item.chats.findIndex((c) => c.id === id);
+        if (idx !== -1) {
+          const newChats = [...item.chats];
+          newChats[idx] = updater(item.chats[idx]);
+          return { ...item, chats: newChats };
+        }
+        return item;
+      }
+      if (item.id === id) {
+        return updater(item);
+      }
+      return item;
+    });
   };
 
   useEffect(() => {
@@ -88,6 +133,77 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     setDropIndex(before ? overIndex : overIndex + 1);
   };
 
+  const removeChatById = (
+    items: ChatItem[],
+    id: number
+  ): [Chat | null, ChatItem[]] => {
+    const result: ChatItem[] = [];
+    let removed: Chat | null = null;
+    for (const item of items) {
+      if (isFolder(item)) {
+        const idx = item.chats.findIndex((c) => c.id === id);
+        if (idx !== -1) {
+          removed = item.chats[idx];
+          const newFolder = {
+            ...item,
+            chats: item.chats.filter((c) => c.id !== id),
+          };
+          result.push(newFolder);
+        } else {
+          result.push(item);
+        }
+      } else if (item.id === id) {
+        removed = item;
+      } else {
+        result.push(item);
+      }
+    }
+    return [removed, result];
+  };
+
+  const addChatToTarget = (
+    items: ChatItem[],
+    targetId: number,
+    chat: Chat
+  ): ChatItem[] => {
+    return items.map((item) => {
+      if (isFolder(item)) {
+        if (item.id === targetId) {
+          return { ...item, chats: [...item.chats, chat] };
+        }
+        return item;
+      }
+      if (item.id === targetId) {
+        const folder: ChatFolder = {
+          id: Date.now(),
+          title: "Group",
+          chats: [item, chat],
+          expanded: true,
+        };
+        return folder;
+      }
+      return item;
+    });
+  };
+
+  const handleDropOnItem = (targetId: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedId === null) return;
+    if (draggedId === targetId) {
+      setDraggedId(null);
+      setDropIndex(null);
+      return;
+    }
+    setChats((chs) => {
+      const [dragged, without] = removeChatById(chs, draggedId);
+      if (!dragged) return chs;
+      return addChatToTarget(without, targetId, dragged);
+    });
+    setDraggedId(null);
+    setDropIndex(null);
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (draggedId === null || dropIndex === null) return;
@@ -122,6 +238,16 @@ export default function Chat({ expanded }: { expanded: boolean }) {
 
   const toggleContext = (id: number) => {
     setContextChatId((c) => (c === id ? null : id));
+  }
+  
+  const toggleFolder = (id: number) => {
+    setChats((chs) =>
+      chs.map((item) =>
+        isFolder(item) && item.id === id
+          ? { ...item, expanded: !item.expanded }
+          : item
+      )
+    );
   };
 
   const truncateTitle = (text: string, words = 4) => {
@@ -139,16 +265,11 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     };
 
     setChats((chs) =>
-      chs.map((c) => {
-        if (c.id !== currentChatId) return c;
-        const updated = {
-          ...c,
-          messages: [...c.messages, userMessage],
-          title:
-            c.title === "New Chat" ? truncateTitle(input) : c.title,
-        };
-        return updated;
-      })
+      updateChat(chs, currentChatId, (c) => ({
+        ...c,
+        messages: [...c.messages, userMessage],
+        title: c.title === "New Chat" ? truncateTitle(input) : c.title,
+      }))
     );
 
     const reply: Message = {
@@ -158,11 +279,10 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     };
     setTimeout(() => {
       setChats((chs) =>
-        chs.map((c) =>
-          c.id === currentChatId
-            ? { ...c, messages: [...c.messages, reply] }
-            : c
-        )
+        updateChat(chs, currentChatId, (c) => ({
+          ...c,
+          messages: [...c.messages, reply],
+        }))
       );
     }, 300);
     setInput("");
@@ -198,38 +318,72 @@ export default function Chat({ expanded }: { expanded: boolean }) {
           onDragOver={handleContainerDragOver}
           onDrop={handleDrop}
         >
-          {chats.map((chat, index) => (
-            <React.Fragment key={chat.id}>
+          {chats.map((item, index) => (
+            <React.Fragment key={item.id}>
               {dropIndex === index && (
                 <div className="h-0.5 bg-primary rounded" />
               )}
-              <div className="relative">
-                <Button
-                  variant={chat.id === currentChatId ? "secondary" : "ghost"}
-                  className="w-full justify-start pr-8 group"
-                  draggable
-                  onDragStart={handleDragStart(chat.id)}
-                  onDragOver={handleDragOver(chat.id)}
-                  onDragEnd={handleDragEnd}
-                  onClick={() => setCurrentChatId(chat.id)}
-                >
-                  <span className="truncate">{chat.title}</span>
-                  <span
-                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleContext(chat.id);
-                    }}
+              {isFolder(item) ? (
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start font-semibold"
+                    draggable
+                    onDragStart={handleDragStart(item.id)}
+                    onDragOver={handleDragOver(item.id)}
+                    onDragEnd={handleDragEnd}
+                    onDrop={handleDropOnItem(item.id)}
+                    onClick={() => toggleFolder(item.id)}
                   >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </span>
-                </Button>
-                {contextChatId === chat.id && (
-                  <div className="absolute right-8 top-1/2 -translate-y-1/2 bg-popover text-popover-foreground border rounded-md shadow p-2 z-10">
-                    <p className="text-sm">Chat options</p>
-                  </div>
-                )}
-              </div>
+                    <span className="truncate">{item.title}</span>
+                  </Button>
+                  {item.expanded && (
+                    <div className="pl-4 space-y-1">
+                      {item.chats.map((c) => (
+                        <Button
+                          key={c.id}
+                          variant={
+                            c.id === currentChatId ? "secondary" : "ghost"
+                          }
+                          className="w-full justify-start"
+                          onDrop={handleDropOnItem(item.id)}
+                          onClick={() => setCurrentChatId(c.id)}
+                        >
+                          <span className="truncate">{c.title}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="relative">
+                  <Button
+                    variant={chat.id === currentChatId ? "secondary" : "ghost"}
+                    className="w-full justify-start pr-8 group"
+                    draggable
+                    onDragStart={handleDragStart(chat.id)}
+                    onDragOver={handleDragOver(chat.id)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => setCurrentChatId(chat.id)}
+                  >
+                    <span className="truncate">{chat.title}</span>
+                    <span
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleContext(chat.id);
+                      }}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </span>
+                  </Button>
+                  {contextChatId === chat.id && (
+                    <div className="absolute right-8 top-1/2 -translate-y-1/2 bg-popover text-popover-foreground border rounded-md shadow p-2 z-10">
+                      <p className="text-sm">Chat options</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </React.Fragment>
           ))}
           {dropIndex === chats.length && (
