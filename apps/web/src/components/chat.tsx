@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   const [currentChatId, setCurrentChatId] = useState<number>(initialId);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [draggedId, setDraggedId] = useState<number | null>(null);
   const [sidebarRight, setSidebarRight] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -70,6 +71,32 @@ export default function Chat({ expanded }: { expanded: boolean }) {
       recognition.start();
     }
   };
+
+  const handleDragStart = (id: number) => (e: React.DragEvent) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDrop = (id: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+    if (draggedId === null || draggedId === id) return;
+    setChats((chs) => {
+      const draggedIndex = chs.findIndex((c) => c.id === draggedId);
+      const dropIndex = chs.findIndex((c) => c.id === id);
+      if (draggedIndex === -1 || dropIndex === -1) return chs;
+      const updated = [...chs];
+      const [removed] = updated.splice(draggedIndex, 1);
+      updated.splice(dropIndex, 0, removed);
+      return updated;
+    });
+    setDraggedId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnd = () => setDraggedId(null);
 
   const truncateTitle = (text: string, words = 4) => {
     const parts = text.trim().split(/\s+/);
@@ -148,6 +175,11 @@ export default function Chat({ expanded }: { expanded: boolean }) {
                 chat.id === currentChatId ? "secondary" : "ghost"
               }
               className="w-full justify-start"
+              draggable
+              onDragStart={handleDragStart(chat.id)}
+              onDrop={handleDrop(chat.id)}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
               onClick={() => setCurrentChatId(chat.id)}
             >
               <span className="truncate">{chat.title}</span>
