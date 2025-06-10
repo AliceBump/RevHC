@@ -1,48 +1,42 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import './App.css'
-import { useCurrentUser, setCurrentUser } from './store/userStore'
+import SignIn from "@/components/sign-in";
+import Chat from "@/components/chat";
+import {
+  useCurrentUser,
+  setCurrentUser,
+  clearCurrentUser,
+} from "./store/userStore";
+import { Button } from "@/components/ui/button";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
-  const currentUser = useCurrentUser()
+  const currentUser = useCurrentUser();
+
+  if (!currentUser) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <SignIn />
+        <Button
+          onClick={() =>
+            setCurrentUser({ id: "1", name: "Demo User", role: "patient" })
+          }
+        >
+          Demo Login
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <h1 className="text-2xl font-semibold mb-4">Vite + React</h1>
-      <div className="space-y-4">
-        <Button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className="h-screen flex flex-col">
+      <div className="p-2 border-b flex justify-between items-center">
+        <p className="text-sm">Logged in as {currentUser.name}</p>
+        <Button size="sm" onClick={clearCurrentUser}>
+          Log out
         </Button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-        <div style={{ marginTop: '1rem' }}>
-          <button
-            onClick={() =>
-              setCurrentUser({ id: '1', name: 'Jane Doe', role: 'patient' })
-            }
-          >
-            Set Patient User
-          </button>
-          <button
-            onClick={() =>
-              setCurrentUser({ id: '2', name: 'Dr. Smith', role: 'provider' })
-            }
-            style={{ marginLeft: '0.5rem' }}
-          >
-            Set Provider User
-          </button>
-        </div>
       </div>
-      {currentUser && (
-        <p className="read-the-docs">Current User: {currentUser.name}</p>
-      )}
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      <Chat />
+    </div>
+  );
 }
 
-export default App
+export default App;
