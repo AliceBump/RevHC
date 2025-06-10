@@ -5,7 +5,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     async sendResetPassword(data) {
-      const email = (data.user as any).email
+      const email = (data.user as { email?: string }).email
       if (!email || !process.env.EMAIL_API_URL) {
         console.warn('Email service not configured or user email missing.')
         return
