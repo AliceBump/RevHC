@@ -4,18 +4,17 @@ import { Button } from '@/components/ui/button'
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) {
-      return 'dark'
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('theme') as 'light' | 'dark' | null
+      if (stored) {
+        return stored
+      }
+      if (document.documentElement.classList.contains('dark')) {
+        return 'dark'
+      }
     }
     return 'light'
   })
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem('theme') as 'light' | 'dark' | null
-    if (stored) {
-      setTheme(stored)
-    }
-  }, [])
 
   useEffect(() => {
     if (theme === 'dark') {
@@ -23,7 +22,7 @@ export default function ThemeToggle() {
     } else {
       document.documentElement.classList.remove('dark')
     }
-    sessionStorage.setItem('theme', theme)
+    localStorage.setItem('theme', theme)
   }, [theme])
 
   return (
