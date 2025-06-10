@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, ArrowLeftRight } from "lucide-react";
+import { Mic, MicOff, ArrowLeftRight, MoreHorizontal } from "lucide-react";
 
 interface WindowWithSpeechRecognition extends Window {
   webkitSpeechRecognition?: typeof SpeechRecognition;
@@ -32,6 +32,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   const [draggedId, setDraggedId] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [sidebarRight, setSidebarRight] = useState(false);
+  const [contextChatId, setContextChatId] = useState<number | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const currentChat = chats.find((c) => c.id === currentChatId)!;
@@ -119,6 +120,10 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     setDropIndex(null);
   };
 
+  const toggleContext = (id: number) => {
+    setContextChatId((c) => (c === id ? null : id));
+  };
+
   const truncateTitle = (text: string, words = 4) => {
     const parts = text.trim().split(/\s+/);
     const snippet = parts.slice(0, words).join(" ");
@@ -198,17 +203,33 @@ export default function Chat({ expanded }: { expanded: boolean }) {
               {dropIndex === index && (
                 <div className="h-0.5 bg-primary rounded" />
               )}
-              <Button
-                variant={chat.id === currentChatId ? "secondary" : "ghost"}
-                className="w-full justify-start"
-                draggable
-                onDragStart={handleDragStart(chat.id)}
-                onDragOver={handleDragOver(chat.id)}
-                onDragEnd={handleDragEnd}
-                onClick={() => setCurrentChatId(chat.id)}
-              >
-                <span className="truncate">{chat.title}</span>
-              </Button>
+              <div className="relative">
+                <Button
+                  variant={chat.id === currentChatId ? "secondary" : "ghost"}
+                  className="w-full justify-start pr-8 group"
+                  draggable
+                  onDragStart={handleDragStart(chat.id)}
+                  onDragOver={handleDragOver(chat.id)}
+                  onDragEnd={handleDragEnd}
+                  onClick={() => setCurrentChatId(chat.id)}
+                >
+                  <span className="truncate">{chat.title}</span>
+                  <span
+                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleContext(chat.id);
+                    }}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </span>
+                </Button>
+                {contextChatId === chat.id && (
+                  <div className="absolute right-8 top-1/2 -translate-y-1/2 bg-popover text-popover-foreground border rounded-md shadow p-2 z-10">
+                    <p className="text-sm">Chat options</p>
+                  </div>
+                )}
+              </div>
             </React.Fragment>
           ))}
           {dropIndex === chats.length && (
