@@ -19,7 +19,7 @@
     "@tanstack/store": "latest",
     "@tanstack/react-store": "latest",
     "@tanstack/db": "latest",
-    "better-auth": "^0.0.0"
+    "better-auth": "^1.2.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
