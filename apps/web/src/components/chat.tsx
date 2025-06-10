@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Mic, MicOff } from "lucide-react";
+
+interface WindowWithSpeechRecognition extends Window {
+  webkitSpeechRecognition?: typeof SpeechRecognition;
+}
 
 interface Message {
   id: number;
@@ -12,6 +17,39 @@ interface Message {
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  useEffect(() => {
+    const SpeechRecognitionClass =
+      (window as WindowWithSpeechRecognition).SpeechRecognition ||
+      (window as WindowWithSpeechRecognition).webkitSpeechRecognition;
+    if (!SpeechRecognitionClass) return;
+    const recognition = new SpeechRecognitionClass();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
+      const transcript = Array.from(e.results)
+        .map((r) => r[0].transcript)
+        .join("");
+      setInput(transcript);
+    };
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+  }, []);
+
+  const toggleListening = () => {
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+    if (listening) {
+      recognition.stop();
+      setListening(false);
+    } else {
+      setListening(true);
+      recognition.start();
+    }
+  };
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -61,6 +99,9 @@ export default function Chat() {
             }
           }}
         />
+        <Button variant="ghost" size="icon" onClick={toggleListening}>
+          {listening ? <MicOff size={20} /> : <Mic size={20} />}
+        </Button>
         <Button onClick={sendMessage}>Send</Button>
       </div>
     </div>

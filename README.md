@@ -20,6 +20,10 @@ pnpm --filter web dev
 pnpm --filter mobile start
 ```
 
+## Voice input
+
+The chat interface in the web app features a microphone button powered by the Web Speech API. Press it to dictate a message instead of typing.
+
 ## State management and storage
 
 The web application uses [TanStack Store](https://tanstack.com/store) for client
