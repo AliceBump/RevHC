@@ -132,10 +132,10 @@ export default function Chat({ expanded }: { expanded: boolean }) {
               variant={
                 chat.id === currentChatId ? "secondary" : "ghost"
               }
-              className="w-full justify-start truncate"
+              className="w-full justify-start"
               onClick={() => setCurrentChatId(chat.id)}
             >
-              {chat.title}
+              <span className="truncate">{chat.title}</span>
             </Button>
           ))}
         </div>
