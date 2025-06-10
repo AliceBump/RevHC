@@ -99,16 +99,16 @@ export default function SignIn() {
             disabled={loading}
             className="gap-2"
             onClick={async () => {
-              await signIn.passkey(
-                {
+              await signIn.passkey({
+                fetchOptions: {
                   onRequest: () => {
                     setLoading(true)
                   },
                   onResponse: () => {
                     setLoading(false)
                   },
-                }
-              )
+                },
+              })
             }}
           >
             <Key size={16} />

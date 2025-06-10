@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff, ArrowLeftRight, MoreHorizontal } from "lucide-react";
 
 interface WindowWithSpeechRecognition extends Window {
-  webkitSpeechRecognition?: typeof SpeechRecognition;
+  SpeechRecognition?: typeof SpeechRecognition
+  webkitSpeechRecognition?: typeof SpeechRecognition
 }
 
 interface Message {
@@ -98,8 +99,8 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     recognition.interimResults = false;
     recognition.lang = "en-US";
     recognition.onresult = (e: SpeechRecognitionEvent) => {
-      const transcript = Array.from(e.results)
-        .map((r) => r[0].transcript)
+      const transcript = Array.from(e.results as SpeechRecognitionResultList)
+        .map((r) => (r as SpeechRecognitionResult)[0].transcript)
         .join("");
       setInput(transcript);
     };
