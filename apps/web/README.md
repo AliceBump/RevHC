@@ -52,3 +52,6 @@ export default tseslint.config({
   },
 })
 ```
+
+## TanStack Store and DB
+This app uses TanStack Store for local state and TanStack DB for persisting users and roles.

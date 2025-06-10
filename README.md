@@ -19,3 +19,11 @@ Use the following scripts to start the applications:
 pnpm --filter web dev
 pnpm --filter mobile start
 ```
+
+## State management and storage
+
+The web application uses [TanStack Store](https://tanstack.com/store) for client
+side state management and [TanStack DB](https://tanstack.com/db) for local
+storage. An initial schema defines a `users` table to keep track of patients and
+healthcare providers and their roles. Utility helpers in `src/store` provide a
+simple API to update and read the current user.
