@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment:
       name: github-pages
     steps:
@@ -24,11 +24,11 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 10
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: 'pnpm'
 
       - run: pnpm install --no-frozen-lockfile
