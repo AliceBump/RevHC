@@ -126,7 +126,7 @@ export default function Chat() {
               variant={
                 chat.id === currentChatId ? "secondary" : "ghost"
               }
-              className="w-full justify-start"
+              className="w-full justify-start truncate"
               onClick={() => setCurrentChatId(chat.id)}
             >
               {chat.title}
