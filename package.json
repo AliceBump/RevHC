@@ -1,9 +1,20 @@
 {
-  "name": "revhc-monorepo",
-  "private": true,
+  "name": "revhc",
   "version": "1.0.0",
-  "workspaces": ["apps/*"],
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "install": "pnpm install --recursive"
-  }
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:desktop": "pnpm --filter @revhc/desktop tauri dev",
+    "dev:mobile": "pnpm --filter @revhc/mobile start",
+    "dev:web": "pnpm --filter @revhc/web dev",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  },
+  "packageManager": "pnpm@10.12.1"
 }
