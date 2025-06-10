@@ -6,7 +6,6 @@ import {
   clearCurrentUser,
 } from "./store/userStore";
 import { Button } from "@/components/ui/button";
-import "./App.css";
 
 function App() {
   const currentUser = useCurrentUser();
