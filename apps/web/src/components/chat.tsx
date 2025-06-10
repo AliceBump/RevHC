@@ -30,6 +30,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
   const [draggedId, setDraggedId] = useState<number | null>(null);
+  const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [sidebarRight, setSidebarRight] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -77,26 +78,46 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDrop = (id: number) => (e: React.DragEvent) => {
+  const handleDragOver = (id: number) => (e: React.DragEvent) => {
     e.preventDefault();
-    if (draggedId === null || draggedId === id) return;
+    if (draggedId === null) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const overIndex = chats.findIndex((c) => c.id === id);
+    const before = e.clientY < rect.top + rect.height / 2;
+    setDropIndex(before ? overIndex : overIndex + 1);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (draggedId === null || dropIndex === null) return;
     setChats((chs) => {
-      const draggedIndex = chs.findIndex((c) => c.id === draggedId);
-      const dropIndex = chs.findIndex((c) => c.id === id);
-      if (draggedIndex === -1 || dropIndex === -1) return chs;
+      const from = chs.findIndex((c) => c.id === draggedId);
+      if (from === -1) return chs;
       const updated = [...chs];
-      const [removed] = updated.splice(draggedIndex, 1);
-      updated.splice(dropIndex, 0, removed);
+      const [removed] = updated.splice(from, 1);
+      let target = dropIndex;
+      if (from < target) target -= 1;
+      updated.splice(target, 0, removed);
       return updated;
     });
     setDraggedId(null);
+    setDropIndex(null);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleContainerDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    if (draggedId === null) return;
+    const container = e.currentTarget as HTMLElement;
+    const rect = container.getBoundingClientRect();
+    if (e.clientY > rect.bottom) {
+      setDropIndex(chats.length);
+    }
   };
 
-  const handleDragEnd = () => setDraggedId(null);
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDropIndex(null);
+  };
 
   const truncateTitle = (text: string, words = 4) => {
     const parts = text.trim().split(/\s+/);
@@ -167,24 +188,32 @@ export default function Chat({ expanded }: { expanded: boolean }) {
             <ArrowLeftRight className="h-4 w-4" />
           </Button>
         </div>
-        <div className="flex-1 overflow-auto space-y-1">
-          {chats.map((chat) => (
-            <Button
-              key={chat.id}
-              variant={
-                chat.id === currentChatId ? "secondary" : "ghost"
-              }
-              className="w-full justify-start"
-              draggable
-              onDragStart={handleDragStart(chat.id)}
-              onDrop={handleDrop(chat.id)}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-              onClick={() => setCurrentChatId(chat.id)}
-            >
-              <span className="truncate">{chat.title}</span>
-            </Button>
+        <div
+          className="flex-1 overflow-auto space-y-1"
+          onDragOver={handleContainerDragOver}
+          onDrop={handleDrop}
+        >
+          {chats.map((chat, index) => (
+            <React.Fragment key={chat.id}>
+              {dropIndex === index && (
+                <div className="h-0.5 bg-primary rounded" />
+              )}
+              <Button
+                variant={chat.id === currentChatId ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                draggable
+                onDragStart={handleDragStart(chat.id)}
+                onDragOver={handleDragOver(chat.id)}
+                onDragEnd={handleDragEnd}
+                onClick={() => setCurrentChatId(chat.id)}
+              >
+                <span className="truncate">{chat.title}</span>
+              </Button>
+            </React.Fragment>
           ))}
+          {dropIndex === chats.length && (
+            <div className="h-0.5 bg-primary rounded" />
+          )}
         </div>
       </div>
       <div
