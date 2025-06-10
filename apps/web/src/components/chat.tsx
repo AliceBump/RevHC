@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff, ArrowLeftRight } from "lucide-react";
 
 interface WindowWithSpeechRecognition extends Window {
   webkitSpeechRecognition?: typeof SpeechRecognition;
@@ -29,6 +29,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   const [currentChatId, setCurrentChatId] = useState<number>(initialId);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [sidebarRight, setSidebarRight] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const currentChat = chats.find((c) => c.id === currentChatId)!;
@@ -117,14 +118,29 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-screen md:h-full pl-48",
-        expanded ? "w-full" : "md:max-w-6xl md:mx-auto"
+        "flex h-screen md:h-full",
+        sidebarRight ? "flex-row-reverse" : "flex-row",
+        expanded ? "w-full" : "md:max-w-4xl md:mx-auto"
       )}
     >
-      <div className="fixed inset-y-0 left-0 w-48 border-r p-2 flex flex-col bg-background">
-        <Button size="sm" className="mb-2" onClick={startNewChat}>
-          + New Chat
-        </Button>
+      <div
+        className={cn(
+          "w-48 p-2 flex flex-col",
+          sidebarRight ? "border-l" : "border-r"
+        )}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <Button size="sm" onClick={startNewChat}>
+            + New Chat
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarRight((r) => !r)}
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="flex-1 overflow-auto space-y-1">
           {chats.map((chat) => (
             <Button
