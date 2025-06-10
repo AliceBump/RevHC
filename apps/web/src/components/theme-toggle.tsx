@@ -11,7 +11,7 @@ export default function ThemeToggle() {
   })
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') as 'light' | 'dark' | null
+    const stored = sessionStorage.getItem('theme') as 'light' | 'dark' | null
     if (stored) {
       setTheme(stored)
     }
@@ -23,7 +23,7 @@ export default function ThemeToggle() {
     } else {
       document.documentElement.classList.remove('dark')
     }
-    localStorage.setItem('theme', theme)
+    sessionStorage.setItem('theme', theme)
   }, [theme])
 
   return (
