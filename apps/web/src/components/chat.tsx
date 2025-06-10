@@ -71,7 +71,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col flex-1 w-full max-w-3xl mx-auto">
       <div className="flex-1 overflow-auto p-4 space-y-2">
         {messages.map((msg) => (
           <div
