@@ -117,11 +117,11 @@ export default function Chat({ expanded }: { expanded: boolean }) {
   return (
     <div
       className={cn(
-        "flex h-screen md:h-full",
-        expanded ? "w-full" : "md:max-w-4xl md:mx-auto"
+        "flex h-screen md:h-full pl-48",
+        expanded ? "w-full" : "md:max-w-6xl md:mx-auto"
       )}
     >
-      <div className="w-48 border-r p-2 flex flex-col">
+      <div className="fixed inset-y-0 left-0 w-48 border-r p-2 flex flex-col bg-background">
         <Button size="sm" className="mb-2" onClick={startNewChat}>
           + New Chat
         </Button>
