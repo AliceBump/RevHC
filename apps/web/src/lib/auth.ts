@@ -4,9 +4,26 @@ import { passkey } from 'better-auth/plugins'
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async sendResetPassword(_data, _request) {
-      // TODO: implement email sending logic
+    async sendResetPassword(data) {
+      const email = (data.user as any).email
+      if (!email || !process.env.EMAIL_API_URL) {
+        console.warn('Email service not configured or user email missing.')
+        return
+      }
+
+      try {
+        await fetch(process.env.EMAIL_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: email,
+            subject: 'Reset your password',
+            html: `<p>Click <a href="${data.url}">here</a> to reset your password.</p>`,
+          }),
+        })
+      } catch (err) {
+        console.error('Failed to send reset password email', err)
+      }
     },
   },
   socialProviders: {
