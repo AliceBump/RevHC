@@ -13,16 +13,21 @@ export const store = new Store<AppState>({
 });
 
 export const setCurrentUser = (user: User) => {
-  store.setState((s) => {
-    s.currentUser = user;
-    s.users[user.id] = user;
-  });
-};
+  store.setState((s) => ({
+    ...s,
+    currentUser: user,
+    users: {
+      ...s.users,
+      [user.id]: user,
+    },
+  }))
+}
 
 export const clearCurrentUser = () => {
-  store.setState((s) => {
-    s.currentUser = undefined;
-  });
-};
+  store.setState((s) => ({
+    ...s,
+    currentUser: undefined,
+  }))
+}
 
 export const useCurrentUser = () => useStore(store, (s) => s.currentUser);
