@@ -37,3 +37,11 @@ simple API to update and read the current user.
 Password reset emails are sent via a POST request to the URL provided in the
 `EMAIL_API_URL` environment variable. Configure this variable to point to your
 email service endpoint.
+
+## Deployment
+
+The web application is automatically published to **GitHub Pages** using the
+workflow defined in `.github/workflows/deploy.yml`. GitHub Actions builds the
+`apps/web` project and uploads the generated `dist` directory as a Pages
+artifact on each push to `main`. Make sure GitHub Pages is enabled for the
+repository and set the source to "GitHub Actions".
