@@ -128,7 +128,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
           sidebarRight ? "border-l" : "border-r"
         )}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2 pb-2 border-b">
           <Button size="sm" onClick={startNewChat}>
             + New Chat
           </Button>
