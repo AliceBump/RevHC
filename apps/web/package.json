@@ -15,7 +15,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.292.0",
-    "tailwind-merge": "^1.14.0"
+    "tailwind-merge": "^1.14.0",
     "@tanstack/store": "latest",
     "@tanstack/react-store": "latest",
     "@tanstack/db": "latest"
