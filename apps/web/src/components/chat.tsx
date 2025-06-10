@@ -120,7 +120,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
       className={cn(
         "flex h-screen md:h-full",
         sidebarRight ? "flex-row-reverse" : "flex-row",
-        expanded ? "w-full" : "md:max-w-4xl md:mx-auto"
+        expanded ? "w-full" : "md:max-w-5xl md:mx-auto"
       )}
     >
       <div
@@ -165,7 +165,7 @@ export default function Chat({ expanded }: { expanded: boolean }) {
                 msg.role === "user" ? "flex justify-end" : "flex justify-start"
               }
             >
-              <Card className="max-w-md">
+              <Card className="max-w-lg">
                 <CardContent className="p-2">
                   <p>{msg.content}</p>
                 </CardContent>
