@@ -34,7 +34,15 @@ type ChatItem = Chat | ChatFolder;
 const isFolder = (item: ChatItem): item is ChatFolder =>
   (item as ChatFolder).chats !== undefined;
 
-export default function Chat({ expanded }: { expanded: boolean }) {
+export default function Chat({
+  expanded,
+  mobileSidebarOpen,
+  setMobileSidebarOpen,
+}: {
+  expanded: boolean;
+  mobileSidebarOpen: boolean;
+  setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const initialId = Date.now();
   const [chats, setChats] = useState<ChatItem[]>([
     { id: initialId, title: "New Chat", messages: [] },
@@ -289,19 +297,13 @@ export default function Chat({ expanded }: { expanded: boolean }) {
     setInput("");
   };
 
-  return (
+  const sidebar = (
     <div
       className={cn(
-        "flex h-screen md:h-full w-full",
-        sidebarRight ? "flex-row-reverse" : "flex-row"
+        "w-48 p-2 flex flex-col bg-background h-full",
+        sidebarRight ? "border-l" : "border-r"
       )}
     >
-      <div
-        className={cn(
-          "w-48 p-2 flex flex-col",
-          sidebarRight ? "border-l" : "border-r"
-        )}
-      >
         <div className="flex items-center justify-between mb-2 pb-2 border-b">
           <Button size="sm" onClick={startNewChat}>
             + New Chat
@@ -392,6 +394,32 @@ export default function Chat({ expanded }: { expanded: boolean }) {
           )}
         </div>
       </div>
+  );
+
+  return (
+    <div
+      className={cn(
+        "flex h-screen md:h-full w-full relative",
+        sidebarRight ? "flex-row-reverse" : "flex-row"
+      )}
+    >
+      <div className="hidden md:flex">{sidebar}</div>
+      {mobileSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <div
+            className={cn(
+              "absolute top-0 bottom-0",
+              sidebarRight ? "right-0" : "left-0"
+            )}
+          >
+            {sidebar}
+          </div>
+        </div>
+      )}
       <div
         className={cn(
           "flex-1 flex flex-col",
