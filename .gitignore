@@ -195,3 +195,4 @@ cython_debug/
 .cursorindexingignore
 
 node_modules/
+.turbo/
