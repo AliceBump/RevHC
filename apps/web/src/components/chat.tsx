@@ -55,6 +55,7 @@ export default function Chat({
   const [sidebarRight, setSidebarRight] = useState(false);
   const [contextChatId, setContextChatId] = useState<number | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const touchDragging = useRef(false);
 
   const findChatById = (items: ChatItem[], id: number): Chat | undefined => {
     for (const item of items) {
@@ -245,6 +246,41 @@ export default function Chat({
     setDropIndex(null);
   };
 
+  const handlePointerDown = (id: number) => (e: React.PointerEvent) => {
+    if (e.pointerType !== "touch") return;
+    touchDragging.current = true;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    handleDragStart(id)(e as unknown as React.DragEvent);
+  };
+
+  const handlePointerMove = (id: number) => (e: React.PointerEvent) => {
+    if (!touchDragging.current) return;
+    e.preventDefault();
+    handleDragOver(id)(e as unknown as React.DragEvent);
+  };
+
+  const handlePointerMoveContainer = (e: React.PointerEvent) => {
+    if (!touchDragging.current) return;
+    e.preventDefault();
+    handleContainerDragOver(e as unknown as React.DragEvent);
+  };
+
+  const handlePointerUpItem = (id: number) => (e: React.PointerEvent) => {
+    if (!touchDragging.current) return;
+    handleDropOnItem(id)(e as unknown as React.DragEvent);
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    handleDragEnd();
+    touchDragging.current = false;
+  };
+
+  const handlePointerUpContainer = (e: React.PointerEvent) => {
+    if (!touchDragging.current) return;
+    handleDrop(e as unknown as React.DragEvent);
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    handleDragEnd();
+    touchDragging.current = false;
+  };
+
   const toggleContext = (id: number) => {
     setContextChatId((c) => (c === id ? null : id));
   }
@@ -320,6 +356,9 @@ export default function Chat({
           className="flex-1 overflow-auto space-y-1"
           onDragOver={handleContainerDragOver}
           onDrop={handleDrop}
+          onPointerMove={handlePointerMoveContainer}
+          onPointerUp={handlePointerUpContainer}
+          onPointerCancel={handleDragEnd}
         >
           {chats.map((item, index) => (
             <React.Fragment key={item.id}>
@@ -336,6 +375,10 @@ export default function Chat({
                     onDragOver={handleDragOver(item.id)}
                     onDragEnd={handleDragEnd}
                     onDrop={handleDropOnItem(item.id)}
+                    onPointerDown={handlePointerDown(item.id)}
+                    onPointerMove={handlePointerMove(item.id)}
+                    onPointerUp={handlePointerUpItem(item.id)}
+                    onPointerCancel={handleDragEnd}
                     onClick={() => toggleFolder(item.id)}
                   >
                     <span className="truncate">{item.title}</span>
@@ -367,6 +410,10 @@ export default function Chat({
                     onDragStart={handleDragStart(item.id)}
                     onDragOver={handleDragOver(item.id)}
                     onDragEnd={handleDragEnd}
+                    onPointerDown={handlePointerDown(item.id)}
+                    onPointerMove={handlePointerMove(item.id)}
+                    onPointerUp={handlePointerUpItem(item.id)}
+                    onPointerCancel={handleDragEnd}
                     onClick={() => setCurrentChatId(item.id)}
                   >
                     <span className="truncate">{item.title}</span>
