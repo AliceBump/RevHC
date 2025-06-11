@@ -16,8 +16,8 @@ function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   if (!currentUser) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      return (
+        <div className="flex flex-col items-center justify-center min-h-dvh gap-4">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -33,8 +33,8 @@ function App() {
     );
   }
 
-  return (
-    <div className="h-screen flex flex-col">
+    return (
+      <div className="h-dvh flex flex-col">
       <div className="p-2 border-b flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Button

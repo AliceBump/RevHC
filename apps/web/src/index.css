@@ -77,6 +77,6 @@
   html,
   body,
   #root {
-    @apply w-full h-full;
+    @apply w-full min-h-dvh;
   }
 }
