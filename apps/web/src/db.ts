@@ -1,5 +1,6 @@
 // Temporary stubs until TanStack DB APIs stabilize
 export function createTable<T>() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const table: any = {}
   table.setName = (name: string) => {
     table.name = name
@@ -15,7 +16,7 @@ export function createTable<T>() {
   }
 }
 
-export function createDatabase<T extends Record<string, any>>(tables: T) {
+export function createDatabase<T extends Record<string, unknown>>(tables: T) {
   return tables
 }
 
