@@ -399,7 +399,7 @@ export default function Chat({
   return (
     <div
       className={cn(
-        "flex h-screen md:h-full w-full relative",
+        "flex h-dvh md:h-full w-full relative",
         sidebarRight ? "flex-row-reverse" : "flex-row"
       )}
     >
