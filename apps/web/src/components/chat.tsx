@@ -54,6 +54,7 @@ export default function Chat({
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [sidebarRight, setSidebarRight] = useState(false);
   const [contextChatId, setContextChatId] = useState<number | null>(null);
+  const [hoverFolderId, setHoverFolderId] = useState<number | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const touchDragging = useRef(false);
 
@@ -129,7 +130,20 @@ export default function Chat({
     }
   };
 
+  const updateFolderTitle = (id: number, title: string) => {
+    setChats((chs) =>
+      chs.map((item) =>
+        isFolder(item) && item.id === id ? { ...item, title } : item
+      )
+    );
+  };
+
   const handleDragStart = (id: number) => (e: React.DragEvent) => {
+    const item = chats.find((c) => c.id === id);
+    if (item && isFolder(item)) {
+      e.preventDefault();
+      return;
+    }
     setDraggedId(id);
     e.dataTransfer.effectAllowed = "move";
   };
@@ -248,6 +262,8 @@ export default function Chat({
 
   const handlePointerDown = (id: number) => (e: React.PointerEvent) => {
     if (e.pointerType !== "touch") return;
+    const item = chats.find((c) => c.id === id);
+    if (item && isFolder(item)) return;
     touchDragging.current = true;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     handleDragStart(id)(e as unknown as React.DragEvent);
@@ -366,7 +382,13 @@ export default function Chat({
                 <div className="h-0.5 bg-primary rounded" />
               )}
               {isFolder(item) ? (
-                <div>
+                <div
+                  className="relative"
+                  onMouseEnter={() => setHoverFolderId(item.id)}
+                  onMouseLeave={() =>
+                    setHoverFolderId((h) => (h === item.id ? null : h))
+                  }
+                >
                   <Button
                     variant="ghost"
                     className="w-full justify-start font-semibold"
@@ -383,13 +405,30 @@ export default function Chat({
                   >
                     <span className="truncate">{item.title}</span>
                   </Button>
+                  {hoverFolderId === item.id && (
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 bg-popover text-popover-foreground border rounded-md shadow p-2 z-10">
+                      <Input
+                        className="h-8"
+                        defaultValue={item.title}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            updateFolderTitle(item.id, (e.target as HTMLInputElement).value);
+                            (e.target as HTMLInputElement).blur();
+                          }
+                        }}
+                        onBlur={(e) =>
+                          updateFolderTitle(item.id, (e.target as HTMLInputElement).value)
+                        }
+                      />
+                    </div>
+                  )}
                   {item.expanded && (
                     <div className="pl-4 space-y-1">
                       {item.chats.map((c) => (
                         <Button
                           key={c.id}
                           variant={
-                            c.id === currentChatId ? "secondary" : "ghost"
+                            c.id === currentChatId ? 'secondary' : 'ghost'
                           }
                           className="w-full justify-start"
                           onDrop={handleDropOnItem(item.id)}
