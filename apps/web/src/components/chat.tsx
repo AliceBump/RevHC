@@ -145,7 +145,10 @@ export default function Chat({
       return;
     }
     setDraggedId(id);
-    e.dataTransfer.effectAllowed = "move";
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", id.toString());
+    }
   };
 
   const handleDragOver = (id: number) => (e: React.DragEvent) => {
