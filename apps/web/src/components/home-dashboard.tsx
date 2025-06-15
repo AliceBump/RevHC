@@ -15,7 +15,11 @@ const initialConcerns: Concern[] = [
   { id: 1, title: 'Stomach Pain', diagnosis: 'Indigestion', date: '2024-05-28' },
 ]
 
-export default function HomeDashboard() {
+export default function HomeDashboard({
+  onSelectConcern,
+}: {
+  onSelectConcern: (c: Concern) => void
+}) {
   const [layout, setLayout] = useState<'latest' | 'date'>('latest')
   const [reverse, setReverse] = useState(false)
 
@@ -42,7 +46,7 @@ export default function HomeDashboard() {
       </div>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {sorted.map((c) => (
-          <Card key={c.id}>
+          <Card key={c.id} onClick={() => onSelectConcern(c)} className="cursor-pointer">
             <CardHeader>
               <CardTitle>{c.title}</CardTitle>
             </CardHeader>

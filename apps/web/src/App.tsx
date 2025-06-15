@@ -1,6 +1,6 @@
 import SignIn from "@/components/sign-in";
 import Chat from "@/components/chat";
-import HomeDashboard from "@/components/home-dashboard";
+import HomeDashboard, { Concern } from "@/components/home-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
 import { Maximize2, Minimize2, Menu } from "lucide-react";
 import { useState } from "react";
@@ -15,6 +15,7 @@ function App() {
   const currentUser = useCurrentUser();
   const [expanded, setExpanded] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [selectedConcern, setSelectedConcern] = useState<Concern | null>(null);
 
   if (!currentUser) {
       return (
@@ -38,6 +39,11 @@ function App() {
       <div className="h-dvh flex flex-col">
       <div className="p-2 border-b flex justify-between items-center">
         <div className="flex items-center gap-2">
+          {selectedConcern && (
+            <Button variant="ghost" size="sm" onClick={() => setSelectedConcern(null)}>
+              Back
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -67,12 +73,15 @@ function App() {
           </Button>
         </div>
       </div>
-      <HomeDashboard />
-      <Chat
-        expanded={expanded}
-        mobileSidebarOpen={mobileSidebarOpen}
-        setMobileSidebarOpen={setMobileSidebarOpen}
-      />
+      {selectedConcern ? (
+        <Chat
+          expanded={expanded}
+          mobileSidebarOpen={mobileSidebarOpen}
+          setMobileSidebarOpen={setMobileSidebarOpen}
+        />
+      ) : (
+        <HomeDashboard onSelectConcern={setSelectedConcern} />
+      )}
     </div>
   );
 }
