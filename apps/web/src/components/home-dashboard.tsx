@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { CalendarDays, Clock, ArrowUpDown } from 'lucide-react'
 
 export interface Concern {
   id: number
@@ -36,12 +37,24 @@ export default function HomeDashboard({
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={() => setLayout(layout === 'latest' ? 'date' : 'latest')}>
-          Layout: {layout === 'latest' ? 'Latest' : 'By Date'}
+      <div className="flex gap-2 justify-end">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setLayout(layout === 'latest' ? 'date' : 'latest')}
+        >
+          {layout === 'latest' ? (
+            <Clock className="h-4 w-4" />
+          ) : (
+            <CalendarDays className="h-4 w-4" />
+          )}
         </Button>
-        <Button variant="outline" onClick={() => setReverse(r => !r)}>
-          Reverse Order
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setReverse((r) => !r)}
+        >
+          <ArrowUpDown className="h-4 w-4" />
         </Button>
       </div>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
