@@ -1,5 +1,6 @@
 import SignIn from "@/components/sign-in";
 import Chat from "@/components/chat";
+import HomeDashboard from "@/components/home-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
 import { Maximize2, Minimize2, Menu } from "lucide-react";
 import { useState } from "react";
@@ -66,6 +67,7 @@ function App() {
           </Button>
         </div>
       </div>
+      <HomeDashboard />
       <Chat
         expanded={expanded}
         mobileSidebarOpen={mobileSidebarOpen}
