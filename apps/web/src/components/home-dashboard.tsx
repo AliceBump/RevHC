@@ -28,6 +28,7 @@ export default function HomeDashboard({
   onSelectConcern: (c: Concern) => void
 }) {
   const [layout, setLayout] = useState<'latest' | 'date'>('latest')
+  const [groupBy, setGroupBy] = useState<'none' | 'week' | 'month' | 'year'>('none')
   const [reverse, setReverse] = useState(false)
   const [shape, setShape] = useState<'rect' | 'square'>('rect')
 
@@ -41,6 +42,36 @@ export default function HomeDashboard({
   if (reverse) {
     sorted.reverse()
   }
+
+  function getWeekNumber(date: Date) {
+    const firstDay = new Date(date.getFullYear(), 0, 1)
+    const pastDays =
+      (date.getTime() - firstDay.getTime()) / (24 * 60 * 60 * 1000)
+    return Math.ceil((pastDays + firstDay.getDay() + 1) / 7)
+  }
+
+  const effectiveGroupBy = layout === 'date' ? groupBy : 'none'
+
+  const groups = (() => {
+    if (effectiveGroupBy === 'none') {
+      return [{ label: '', items: sorted }]
+    }
+    const map: Record<string, Concern[]> = {}
+    for (const c of sorted) {
+      const d = new Date(c.date)
+      let key = ''
+      if (effectiveGroupBy === 'year') {
+        key = d.getFullYear().toString()
+      } else if (effectiveGroupBy === 'month') {
+        key = `${d.toLocaleString('default', { month: 'long' })} ${d.getFullYear()}`
+      } else if (effectiveGroupBy === 'week') {
+        key = `Week ${getWeekNumber(d)} ${d.getFullYear()}`
+      }
+      map[key] ??= []
+      map[key].push(c)
+    }
+    return Object.entries(map).map(([label, items]) => ({ label, items }))
+  })()
 
   return (
     <div className="p-4 space-y-4">
@@ -56,6 +87,20 @@ export default function HomeDashboard({
             <CalendarDays className="h-4 w-4" />
           )}
         </Button>
+        {layout === 'date' && (
+          <select
+            value={groupBy}
+            onChange={(e) =>
+              setGroupBy(e.target.value as 'none' | 'week' | 'month' | 'year')
+            }
+            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          >
+            <option value="none">No grouping</option>
+            <option value="week">By week</option>
+            <option value="month">By month</option>
+            <option value="year">By year</option>
+          </select>
+        )}
         <Button
           variant="ghost"
           size="icon"
@@ -75,31 +120,36 @@ export default function HomeDashboard({
           )}
         </Button>
       </div>
-      <div
-        className={`grid gap-4 ${
-          shape === 'square'
-            ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
-            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-        }`}
-      >
-        {sorted.map((c) => (
-          <Card
-            key={c.id}
-            onClick={() => onSelectConcern(c)}
-            className={`cursor-pointer ${shape === 'square' ? 'aspect-square flex flex-col' : ''}`}
+      {groups.map((group) => (
+        <div key={group.label} className="space-y-2">
+          {group.label && <h4 className="font-semibold">{group.label}</h4>}
+          <div
+            className={`grid gap-4 ${
+              shape === 'square'
+                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+            }`}
           >
-            <CardHeader>
-              <CardTitle>{c.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="text-sm text-muted-foreground">{c.date}</div>
-              <span className="inline-block bg-secondary text-secondary-foreground px-2 py-1 rounded">
-                {c.diagnosis}
-              </span>
-            </CardContent>
-          </Card>
-        ))}
+            {group.items.map((c) => (
+              <Card
+                key={c.id}
+                onClick={() => onSelectConcern(c)}
+                className={`cursor-pointer ${shape === 'square' ? 'aspect-square flex flex-col' : ''}`}
+              >
+                <CardHeader>
+                  <CardTitle>{c.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="text-sm text-muted-foreground">{c.date}</div>
+                  <span className="inline-block bg-secondary text-secondary-foreground px-2 py-1 rounded">
+                    {c.diagnosis}
+                  </span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
       </div>
-    </div>
   )
 }
