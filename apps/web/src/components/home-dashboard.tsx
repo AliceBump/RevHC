@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CalendarDays, Clock, ArrowUpDown } from 'lucide-react'
+import {
+  CalendarDays,
+  Clock,
+  ArrowUpDown,
+  LayoutGrid,
+  RectangleHorizontal,
+} from 'lucide-react'
 
 export interface Concern {
   id: number
@@ -23,6 +29,7 @@ export default function HomeDashboard({
 }) {
   const [layout, setLayout] = useState<'latest' | 'date'>('latest')
   const [reverse, setReverse] = useState(false)
+  const [shape, setShape] = useState<'rect' | 'square'>('rect')
 
   const sorted = [...initialConcerns].sort((a, b) => {
     if (layout === 'latest') {
@@ -56,10 +63,31 @@ export default function HomeDashboard({
         >
           <ArrowUpDown className="h-4 w-4" />
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShape(shape === 'rect' ? 'square' : 'rect')}
+        >
+          {shape === 'square' ? (
+            <RectangleHorizontal className="h-4 w-4" />
+          ) : (
+            <LayoutGrid className="h-4 w-4" />
+          )}
+        </Button>
       </div>
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={`grid gap-4 ${
+          shape === 'square'
+            ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+        }`}
+      >
         {sorted.map((c) => (
-          <Card key={c.id} onClick={() => onSelectConcern(c)} className="cursor-pointer">
+          <Card
+            key={c.id}
+            onClick={() => onSelectConcern(c)}
+            className={`cursor-pointer ${shape === 'square' ? 'aspect-square flex flex-col' : ''}`}
+          >
             <CardHeader>
               <CardTitle>{c.title}</CardTitle>
             </CardHeader>
