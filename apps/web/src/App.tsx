@@ -48,8 +48,9 @@ function App() {
 
     return (
       <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
+        <div className="flex min-h-dvh">
+          <AppSidebar />
+          <SidebarInset>
           <div className="p-2 border-b flex justify-between items-center">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="md:hidden -ml-1">
@@ -93,7 +94,8 @@ function App() {
           ) : (
             <HomeDashboard onSelectConcern={handleSelectConcern} />
           )}
-        </SidebarInset>
+          </SidebarInset>
+        </div>
       </SidebarProvider>
     );
 }
