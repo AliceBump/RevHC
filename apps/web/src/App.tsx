@@ -2,6 +2,7 @@ import SignIn from "@/components/sign-in";
 import Chat from "@/components/chat";
 import HomeDashboard, { type Concern } from "@/components/home-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
+import Avatar from "@/components/avatar";
 import { Maximize2, Minimize2, Menu } from "lucide-react";
 import { useState } from "react";
 import {
@@ -57,7 +58,7 @@ function App() {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <p className="text-sm">Logged in as {currentUser.name}</p>
+          <Avatar name={currentUser.name} />
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
