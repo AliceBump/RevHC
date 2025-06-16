@@ -355,7 +355,7 @@ export default function Chat({
   const sidebar = (
     <div
       className={cn(
-        "w-48 p-2 flex flex-col bg-background h-full",
+        "w-48 p-2 flex flex-col bg-background dark:bg-neutral-900 h-full",
         sidebarRight ? "border-l" : "border-r"
       )}
     >
