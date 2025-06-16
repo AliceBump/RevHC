@@ -3,6 +3,7 @@ import Chat from "@/components/chat";
 import HomeDashboard, { type Concern } from "@/components/home-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
 import Avatar from "@/components/avatar";
+import Sidebar from "@/components/sidebar";
 import { Home, Maximize2, Minimize2, Menu } from "lucide-react";
 import { useState } from "react";
 import {
@@ -42,19 +43,23 @@ function App() {
   }
 
     return (
-      <div className="h-dvh flex flex-col">
+      <div className="h-dvh flex">
+        <Sidebar
+          mobileOpen={mobileSidebarOpen}
+          setMobileOpen={setMobileSidebarOpen}
+          onHome={() => setSelectedConcern(null)}
+        />
+        <div className="flex-1 flex flex-col">
       <div className="p-2 border-b flex justify-between items-center">
         <div className="flex items-center gap-2">
-          {selectedConcern && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileSidebarOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <Avatar name={currentUser.name} />
           {selectedConcern && (
             <Button
@@ -68,32 +73,31 @@ function App() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden md:inline-flex"
-            onClick={() => setExpanded((e) => !e)}
-          >
-            {expanded ? (
-              <Minimize2 className="h-4 w-4" />
-            ) : (
-              <Maximize2 className="h-4 w-4" />
-            )}
-          </Button>
+          {selectedConcern && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:inline-flex"
+              onClick={() => setExpanded((e) => !e)}
+            >
+              {expanded ? (
+                <Minimize2 className="h-4 w-4" />
+              ) : (
+                <Maximize2 className="h-4 w-4" />
+              )}
+            </Button>
+          )}
           <Button size="sm" onClick={clearCurrentUser}>
             Log out
           </Button>
         </div>
       </div>
       {selectedConcern ? (
-        <Chat
-          expanded={expanded}
-          mobileSidebarOpen={mobileSidebarOpen}
-          setMobileSidebarOpen={setMobileSidebarOpen}
-        />
+        <Chat expanded={expanded} />
       ) : (
         <HomeDashboard onSelectConcern={handleSelectConcern} />
       )}
+    </div>
     </div>
   );
 }

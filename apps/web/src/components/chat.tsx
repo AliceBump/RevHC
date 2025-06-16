@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, ArrowLeftRight, MoreHorizontal } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 
 interface WindowWithSpeechRecognition extends Window {
-  SpeechRecognition?: typeof SpeechRecognition
-  webkitSpeechRecognition?: typeof SpeechRecognition
+  SpeechRecognition?: typeof SpeechRecognition;
+  webkitSpeechRecognition?: typeof SpeechRecognition;
 }
 
 interface Message {
@@ -16,88 +16,11 @@ interface Message {
   content: string;
 }
 
-interface Chat {
-  id: number;
-  title: string;
-  messages: Message[];
-}
-
-interface ChatFolder {
-  id: number;
-  title: string;
-  chats: Chat[];
-  expanded?: boolean;
-}
-
-type ChatItem = Chat | ChatFolder;
-
-const isFolder = (item: ChatItem): item is ChatFolder =>
-  (item as ChatFolder).chats !== undefined;
-
-export default function Chat({
-  expanded,
-  mobileSidebarOpen,
-  setMobileSidebarOpen,
-}: {
-  expanded: boolean;
-  mobileSidebarOpen: boolean;
-  setMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
-  const initialId = Date.now();
-  const [chats, setChats] = useState<ChatItem[]>([
-    { id: initialId, title: "New Chat", messages: [] },
-  ]);
-  const [currentChatId, setCurrentChatId] = useState<number>(initialId);
+export default function Chat({ expanded }: { expanded: boolean }) {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
-  const [draggedId, setDraggedId] = useState<number | null>(null);
-  const [dropIndex, setDropIndex] = useState<number | null>(null);
-  const [sidebarRight, setSidebarRight] = useState(false);
-  const [contextChatId, setContextChatId] = useState<number | null>(null);
-  const [hoverFolderId, setHoverFolderId] = useState<number | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const touchDragging = useRef(false);
-
-  const findChatById = (items: ChatItem[], id: number): Chat | undefined => {
-    for (const item of items) {
-      if (isFolder(item)) {
-        const found = item.chats.find((c) => c.id === id);
-        if (found) return found;
-      } else if (item.id === id) {
-        return item;
-      }
-    }
-  };
-
-  const currentChat = findChatById(chats, currentChatId)!;
-
-  const startNewChat = () => {
-    const id = Date.now();
-    setChats((chs) => [...chs, { id, title: "New Chat", messages: [] }]);
-    setCurrentChatId(id);
-  };
-
-  const updateChat = (
-    items: ChatItem[],
-    id: number,
-    updater: (c: Chat) => Chat
-  ): ChatItem[] => {
-    return items.map((item) => {
-      if (isFolder(item)) {
-        const idx = item.chats.findIndex((c) => c.id === id);
-        if (idx !== -1) {
-          const newChats = [...item.chats];
-          newChats[idx] = updater(item.chats[idx]);
-          return { ...item, chats: newChats };
-        }
-        return item;
-      }
-      if (item.id === id) {
-        return updater(item);
-      }
-      return item;
-    });
-  };
 
   useEffect(() => {
     const SpeechRecognitionClass =
@@ -130,196 +53,6 @@ export default function Chat({
     }
   };
 
-  const updateFolderTitle = (id: number, title: string) => {
-    setChats((chs) =>
-      chs.map((item) =>
-        isFolder(item) && item.id === id ? { ...item, title } : item
-      )
-    );
-  };
-
-  const handleDragStart = (id: number) => (e: React.DragEvent) => {
-    const item = chats.find((c) => c.id === id);
-    if (item && isFolder(item)) {
-      e.preventDefault();
-      return;
-    }
-    setDraggedId(id);
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", id.toString());
-    }
-  };
-
-  const handleDragOver = (id: number) => (e: React.DragEvent) => {
-    e.preventDefault();
-    if (draggedId === null) return;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const overIndex = chats.findIndex((c) => c.id === id);
-    const before = e.clientY < rect.top + rect.height / 2;
-    setDropIndex(before ? overIndex : overIndex + 1);
-  };
-
-  const removeChatById = (
-    items: ChatItem[],
-    id: number
-  ): [Chat | null, ChatItem[]] => {
-    const result: ChatItem[] = [];
-    let removed: Chat | null = null;
-    for (const item of items) {
-      if (isFolder(item)) {
-        const idx = item.chats.findIndex((c) => c.id === id);
-        if (idx !== -1) {
-          removed = item.chats[idx];
-          const newFolder = {
-            ...item,
-            chats: item.chats.filter((c) => c.id !== id),
-          };
-          result.push(newFolder);
-        } else {
-          result.push(item);
-        }
-      } else if (item.id === id) {
-        removed = item;
-      } else {
-        result.push(item);
-      }
-    }
-    return [removed, result];
-  };
-
-  const addChatToTarget = (
-    items: ChatItem[],
-    targetId: number,
-    chat: Chat
-  ): ChatItem[] => {
-    return items.map((item) => {
-      if (isFolder(item)) {
-        if (item.id === targetId) {
-          return { ...item, chats: [...item.chats, chat] };
-        }
-        return item;
-      }
-      if (item.id === targetId) {
-        const folder: ChatFolder = {
-          id: Date.now(),
-          title: "Group",
-          chats: [item, chat],
-          expanded: true,
-        };
-        return folder;
-      }
-      return item;
-    });
-  };
-
-  const handleDropOnItem = (targetId: number) => (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (draggedId === null) return;
-    if (draggedId === targetId) {
-      setDraggedId(null);
-      setDropIndex(null);
-      return;
-    }
-    setChats((chs) => {
-      const [dragged, without] = removeChatById(chs, draggedId);
-      if (!dragged) return chs;
-      return addChatToTarget(without, targetId, dragged);
-    });
-    setDraggedId(null);
-    setDropIndex(null);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (draggedId === null || dropIndex === null) return;
-    setChats((chs) => {
-      const from = chs.findIndex((c) => c.id === draggedId);
-      if (from === -1) return chs;
-      const updated = [...chs];
-      const [removed] = updated.splice(from, 1);
-      let target = dropIndex;
-      if (from < target) target -= 1;
-      updated.splice(target, 0, removed);
-      return updated;
-    });
-    setDraggedId(null);
-    setDropIndex(null);
-  };
-
-  const handleContainerDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (draggedId === null) return;
-    const container = e.currentTarget as HTMLElement;
-    const rect = container.getBoundingClientRect();
-    if (e.clientY > rect.bottom) {
-      setDropIndex(chats.length);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedId(null);
-    setDropIndex(null);
-  };
-
-  const handlePointerDown = (id: number) => (e: React.PointerEvent) => {
-    if (e.pointerType !== "touch") return;
-    const item = chats.find((c) => c.id === id);
-    if (item && isFolder(item)) return;
-    touchDragging.current = true;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    handleDragStart(id)(e as unknown as React.DragEvent);
-  };
-
-  const handlePointerMove = (id: number) => (e: React.PointerEvent) => {
-    if (!touchDragging.current) return;
-    e.preventDefault();
-    handleDragOver(id)(e as unknown as React.DragEvent);
-  };
-
-  const handlePointerMoveContainer = (e: React.PointerEvent) => {
-    if (!touchDragging.current) return;
-    e.preventDefault();
-    handleContainerDragOver(e as unknown as React.DragEvent);
-  };
-
-  const handlePointerUpItem = (id: number) => (e: React.PointerEvent) => {
-    if (!touchDragging.current) return;
-    handleDropOnItem(id)(e as unknown as React.DragEvent);
-    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    handleDragEnd();
-    touchDragging.current = false;
-  };
-
-  const handlePointerUpContainer = (e: React.PointerEvent) => {
-    if (!touchDragging.current) return;
-    handleDrop(e as unknown as React.DragEvent);
-    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    handleDragEnd();
-    touchDragging.current = false;
-  };
-
-  const toggleContext = (id: number) => {
-    setContextChatId((c) => (c === id ? null : id));
-  }
-  
-  const toggleFolder = (id: number) => {
-    setChats((chs) =>
-      chs.map((item) =>
-        isFolder(item) && item.id === id
-          ? { ...item, expanded: !item.expanded }
-          : item
-      )
-    );
-  };
-
-  const truncateTitle = (text: string, words = 4) => {
-    const parts = text.trim().split(/\s+/);
-    const snippet = parts.slice(0, words).join(" ");
-    return parts.length > words ? `${snippet}...` : snippet || "New Chat";
-  };
-
   const sendMessage = () => {
     if (!input.trim()) return;
     const userMessage: Message = {
@@ -327,188 +60,20 @@ export default function Chat({
       role: "user",
       content: input,
     };
-
-    setChats((chs) =>
-      updateChat(chs, currentChatId, (c) => ({
-        ...c,
-        messages: [...c.messages, userMessage],
-        title: c.title === "New Chat" ? truncateTitle(input) : c.title,
-      }))
-    );
-
+    setMessages((ms) => [...ms, userMessage]);
     const reply: Message = {
       id: Date.now() + 1,
       role: "assistant",
       content: `You said: ${input}`,
     };
     setTimeout(() => {
-      setChats((chs) =>
-        updateChat(chs, currentChatId, (c) => ({
-          ...c,
-          messages: [...c.messages, reply],
-        }))
-      );
+      setMessages((ms) => [...ms, reply]);
     }, 300);
     setInput("");
   };
 
-  const sidebar = (
-    <div
-      className={cn(
-        "w-48 p-2 flex flex-col bg-background dark:bg-neutral-900 h-full",
-        sidebarRight ? "border-l" : "border-r"
-      )}
-    >
-        <div className="flex items-center justify-between mb-2 pb-2 border-b">
-          <Button size="sm" onClick={startNewChat}>
-            + New Chat
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarRight((r) => !r)}
-          >
-            <ArrowLeftRight className="h-4 w-4" />
-          </Button>
-        </div>
-        <div
-          className="flex-1 overflow-auto space-y-1"
-          onDragOver={handleContainerDragOver}
-          onDrop={handleDrop}
-          onPointerMove={handlePointerMoveContainer}
-          onPointerUp={handlePointerUpContainer}
-          onPointerCancel={handleDragEnd}
-        >
-          {chats.map((item, index) => (
-            <React.Fragment key={item.id}>
-              {dropIndex === index && (
-                <div className="h-0.5 bg-primary rounded" />
-              )}
-              {isFolder(item) ? (
-                <div
-                  className="relative"
-                  onMouseEnter={() => setHoverFolderId(item.id)}
-                  onMouseLeave={() =>
-                    setHoverFolderId((h) => (h === item.id ? null : h))
-                  }
-                >
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start font-semibold"
-                    draggable
-                    onDragStart={handleDragStart(item.id)}
-                    onDragOver={handleDragOver(item.id)}
-                    onDragEnd={handleDragEnd}
-                    onDrop={handleDropOnItem(item.id)}
-                    onPointerDown={handlePointerDown(item.id)}
-                    onPointerMove={handlePointerMove(item.id)}
-                    onPointerUp={handlePointerUpItem(item.id)}
-                    onPointerCancel={handleDragEnd}
-                    onClick={() => toggleFolder(item.id)}
-                  >
-                    <span className="truncate">{item.title}</span>
-                  </Button>
-                  {hoverFolderId === item.id && (
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 bg-popover text-popover-foreground border rounded-md shadow p-2 z-10">
-                      <Input
-                        className="h-8"
-                        defaultValue={item.title}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            updateFolderTitle(item.id, (e.target as HTMLInputElement).value);
-                            (e.target as HTMLInputElement).blur();
-                          }
-                        }}
-                        onBlur={(e) =>
-                          updateFolderTitle(item.id, (e.target as HTMLInputElement).value)
-                        }
-                      />
-                    </div>
-                  )}
-                  {item.expanded && (
-                    <div className="pl-4 space-y-1">
-                      {item.chats.map((c) => (
-                        <Button
-                          key={c.id}
-                          variant={
-                            c.id === currentChatId ? 'secondary' : 'ghost'
-                          }
-                          className="w-full justify-start"
-                          onDrop={handleDropOnItem(item.id)}
-                          onClick={() => setCurrentChatId(c.id)}
-                        >
-                          <span className="truncate">{c.title}</span>
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="relative">
-                  <Button
-                    variant={item.id === currentChatId ? "secondary" : "ghost"}
-                    className="w-full justify-start pr-8 group"
-                    draggable
-                    onDragStart={handleDragStart(item.id)}
-                    onDragOver={handleDragOver(item.id)}
-                    onDragEnd={handleDragEnd}
-                    onPointerDown={handlePointerDown(item.id)}
-                    onPointerMove={handlePointerMove(item.id)}
-                    onPointerUp={handlePointerUpItem(item.id)}
-                    onPointerCancel={handleDragEnd}
-                    onClick={() => setCurrentChatId(item.id)}
-                  >
-                    <span className="truncate">{item.title}</span>
-                    <span
-                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleContext(item.id);
-                      }}
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </span>
-                  </Button>
-                  {contextChatId === item.id && (
-                    <div className="absolute right-8 top-1/2 -translate-y-1/2 bg-popover text-popover-foreground border rounded-md shadow p-2 z-10">
-                      <p className="text-sm">Chat options</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-          {dropIndex === chats.length && (
-            <div className="h-0.5 bg-primary rounded" />
-          )}
-        </div>
-      </div>
-  );
-
   return (
-    <div
-      className={cn(
-        "flex h-dvh md:h-full w-full relative",
-        sidebarRight ? "flex-row-reverse" : "flex-row"
-      )}
-    >
-      <div className="hidden md:flex">{sidebar}</div>
-      {mobileSidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-          <div
-            className={cn(
-              "absolute top-0 bottom-0",
-              sidebarRight ? "right-0" : "left-0"
-            )}
-          >
-            {sidebar}
-          </div>
-        </div>
-      )}
+    <div className="flex h-dvh md:h-full w-full">
       <div
         className={cn(
           "flex-1 flex flex-col",
@@ -516,7 +81,7 @@ export default function Chat({
         )}
       >
         <div className="flex-1 overflow-auto p-4 space-y-2">
-          {currentChat.messages.map((msg) => (
+          {messages.map((msg) => (
             <div
               key={msg.id}
               className={
