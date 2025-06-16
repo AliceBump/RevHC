@@ -17,6 +17,11 @@ function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectedConcern, setSelectedConcern] = useState<Concern | null>(null);
 
+  const handleSelectConcern = (c: Concern) => {
+    setMobileSidebarOpen(false);
+    setSelectedConcern(c);
+  };
+
   if (!currentUser) {
       return (
         <div className="flex flex-col items-center justify-center min-h-dvh gap-4">
@@ -80,7 +85,7 @@ function App() {
           setMobileSidebarOpen={setMobileSidebarOpen}
         />
       ) : (
-        <HomeDashboard onSelectConcern={setSelectedConcern} />
+        <HomeDashboard onSelectConcern={handleSelectConcern} />
       )}
     </div>
   );
