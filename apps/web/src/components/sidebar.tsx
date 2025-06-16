@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Stethoscope, Settings, Menu } from "lucide-react";
+import { Home, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -42,12 +42,6 @@ export default function Sidebar({
         >
           <Home className="h-4 w-4" />
           {!collapsed && <span>Dashboard</span>}
-        </Button>
-        <Button asChild variant="ghost" className="w-full justify-start gap-2">
-          <a href="/doctor">
-            <Stethoscope className="h-4 w-4" />
-            {!collapsed && <span>Doctor</span>}
-          </a>
         </Button>
       </nav>
       <div className="p-2 border-t">
