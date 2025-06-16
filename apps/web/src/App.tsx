@@ -45,14 +45,16 @@ function App() {
       <div className="h-dvh flex flex-col">
       <div className="p-2 border-b flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          {selectedConcern && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
           <Avatar name={currentUser.name} />
           {selectedConcern && (
             <Button
