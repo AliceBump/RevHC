@@ -1,6 +1,6 @@
 import SignIn from "@/components/sign-in";
 import Chat from "@/components/chat";
-import HomeDashboard, { Concern } from "@/components/home-dashboard";
+import HomeDashboard, { type Concern } from "@/components/home-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
 import { Maximize2, Minimize2, Menu } from "lucide-react";
 import { useState } from "react";
