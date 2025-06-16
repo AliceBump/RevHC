@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,7 +29,24 @@ export default function HomeDashboard({
 }) {
   const [layout, setLayout] = useState<'latest' | 'date'>('latest')
   const [reverse, setReverse] = useState(false)
-  const [shape, setShape] = useState<'rect' | 'square'>('rect')
+  const [shape, setShape] = useState<'rect' | 'square'>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('dashboard-shape') as
+        | 'rect'
+        | 'square'
+        | null
+      if (stored) {
+        return stored
+      }
+    }
+    return 'square'
+  })
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard-shape', shape)
+    }
+  }, [shape])
 
   const sorted = [...initialConcerns].sort((a, b) => {
     if (layout === 'latest') {
