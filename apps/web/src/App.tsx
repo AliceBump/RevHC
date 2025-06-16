@@ -50,14 +50,16 @@ function App() {
               Back
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          {selectedConcern && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
           <Avatar name={currentUser.name} />
         </div>
         <div className="flex items-center gap-2">
