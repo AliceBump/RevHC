@@ -7,6 +7,7 @@ import {
   ArrowUpDown,
   LayoutGrid,
   RectangleHorizontal,
+  Plus,
 } from 'lucide-react'
 
 export interface Concern {
@@ -43,13 +44,15 @@ export default function HomeDashboard({
     return 'square'
   })
 
+  const [concerns, setConcerns] = useState<Concern[]>(initialConcerns)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('dashboard-shape', shape)
     }
   }, [shape])
 
-  const sorted = [...initialConcerns].sort((a, b) => {
+  const sorted = [...concerns].sort((a, b) => {
     if (layout === 'latest') {
       return b.id - a.id
     }
@@ -93,6 +96,23 @@ export default function HomeDashboard({
   return (
     <div className="p-4 space-y-4">
       <div className="flex gap-2 justify-end">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            const nextId = concerns.reduce((m, c) => Math.max(m, c.id), 0) + 1
+            const newConcern = {
+              id: nextId,
+              title: 'New Concern',
+              diagnosis: 'Pending',
+              date: new Date().toISOString().split('T')[0],
+            }
+            setConcerns((cs) => [newConcern, ...cs])
+            onSelectConcern(newConcern)
+          }}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
         <Button
           variant="ghost"
           size="icon"
