@@ -161,27 +161,27 @@ export default function HomeDashboard({
         <div key={group.label} className="space-y-2">
           {group.label && <h4 className="font-semibold">{group.label}</h4>}
           <div
-            className={`grid gap-4 ${
-              shape === 'square'
-                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
-                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-            }`}
-          >
-            {group.items.map((c) => (
-              <Card
-                key={c.id}
-                onClick={() => onSelectConcern(c)}
-                className={`cursor-pointer ${shape === 'square' ? 'aspect-square flex flex-col' : ''}`}
-              >
-                <CardHeader>
-                  <CardTitle>{c.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="text-sm text-muted-foreground">{c.date}</div>
-                  <span className="inline-block bg-secondary text-secondary-foreground px-2 py-1 rounded">
-                    {c.diagnosis}
-                  </span>
-                </CardContent>
+              className={`grid gap-4 ${
+                shape === 'square'
+                  ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
+                  : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              }`}
+            >
+              {group.items.map((c) => (
+                <Card
+                  key={c.id}
+                  onClick={() => onSelectConcern(c)}
+                  className={`cursor-pointer ${shape === 'square' ? 'aspect-square flex flex-col' : ''}`}
+                >
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-base">{c.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 p-4 pt-0">
+                    <div className="text-sm text-muted-foreground">{c.date}</div>
+                    <span className="inline-block bg-secondary text-secondary-foreground px-2 py-1 rounded">
+                      {c.diagnosis}
+                    </span>
+                  </CardContent>
               </Card>
             ))}
           </div>
