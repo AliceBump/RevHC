@@ -3,7 +3,7 @@ import Chat from "@/components/chat";
 import HomeDashboard, { type Concern } from "@/components/home-dashboard";
 import ThemeToggle from "@/components/theme-toggle";
 import Avatar from "@/components/avatar";
-import { Maximize2, Minimize2, Menu } from "lucide-react";
+import { Home, Maximize2, Minimize2, Menu } from "lucide-react";
 import { useState } from "react";
 import {
   useCurrentUser,
@@ -45,11 +45,6 @@ function App() {
       <div className="h-dvh flex flex-col">
       <div className="p-2 border-b flex justify-between items-center">
         <div className="flex items-center gap-2">
-          {selectedConcern && (
-            <Button variant="ghost" size="sm" onClick={() => setSelectedConcern(null)}>
-              Back
-            </Button>
-          )}
           <Button
             variant="ghost"
             size="icon"
@@ -59,6 +54,15 @@ function App() {
             <Menu className="h-5 w-5" />
           </Button>
           <Avatar name={currentUser.name} />
+          {selectedConcern && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedConcern(null)}
+            >
+              <Home className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
