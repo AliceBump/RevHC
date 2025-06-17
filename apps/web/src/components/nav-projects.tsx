@@ -44,7 +44,7 @@ export function NavProjects({
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton>
               <a href={item.url}>
-                <item.icon />
+                <item.icon className="size-4" />
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
@@ -60,16 +60,16 @@ export function NavProjects({
                 style={{ position: "absolute" }}
               >
                 <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
+                  <Folder className="size-4 text-muted-foreground" />
                   <span>View Project</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Forward className="text-muted-foreground" />
+                  <Forward className="size-4 text-muted-foreground" />
                   <span>Share Project</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
+                  <Trash2 className="size-4 text-muted-foreground" />
                   <span>Delete Project</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -78,7 +78,7 @@ export function NavProjects({
         ))}
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontal className="text-sidebar-foreground/70" />
+            <MoreHorizontal className="size-4 text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
