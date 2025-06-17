@@ -40,6 +40,9 @@ export default function HomeDashboard({
       if (stored) {
         return stored
       }
+      if (window.innerWidth >= 1920 && window.innerHeight >= 1080) {
+        return 'rect'
+      }
     }
     return 'square'
   })
