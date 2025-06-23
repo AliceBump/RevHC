@@ -34,7 +34,7 @@ export function NavProjects({
     icon: LucideIcon
   }[]
 }) {
-  useSidebar()
+  const { collapsed } = useSidebar()
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -45,7 +45,7 @@ export function NavProjects({
             <SidebarMenuButton>
               <a href={item.url}>
                 <item.icon className="size-4" />
-                <span>{item.name}</span>
+                {!collapsed && <span>{item.name}</span>}
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -79,7 +79,7 @@ export function NavProjects({
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal className="size-4 text-sidebar-foreground/70" />
-            <span>More</span>
+            {!collapsed && <span>More</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
