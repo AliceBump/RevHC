@@ -53,7 +53,7 @@ function App() {
           <SidebarInset>
           <div className="p-2 border-b flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="md:hidden -ml-1">
+              <SidebarTrigger className="relative z-10 md:hidden -ml-1">
                 <Menu className="h-4 w-4" />
               </SidebarTrigger>
               <Separator orientation="vertical" className="mr-2 h-4" />
