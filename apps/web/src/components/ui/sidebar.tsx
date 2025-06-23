@@ -21,12 +21,11 @@ export function useSidebar() {
 }
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = React.useState(false)
-  const [isMobile, setIsMobile] = React.useState(false)
+  const [collapsed, setCollapsed] = React.useState(() => window.innerWidth < 768)
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768)
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
-    handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
